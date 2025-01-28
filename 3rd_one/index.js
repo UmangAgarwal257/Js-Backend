@@ -1,24 +1,36 @@
 const express = require("express");
 
 const app = express();
+const port = 3000;
 
-let requestCount = 0;
-
-app.use((req, res, next) => {
-  requestCount++;
-  next();
+app.get("/multiply", (req, res) => {
+  const { a, b } = req.query;
+  const result = Number(a) * Number(b);
+  res.json({ result });
 });
 
-app.get("/user", (req, res) => {
-  res.status(200).json({
-    msg: "John Doe",
-  });
+app.get("/divide", (req, res) => {
+  const { a, b } = req.query;
+  if (Number(b) === 0) {
+    res.status(400).json({ error: "Division by zero" });
+  } else {
+    const result = Number(a) / Number(b);
+    res.json({ result });
+  }
 });
 
-app.get("/requestCount", (req, res) => {
-  res.status(200).json({
-    requestCount,
-  });
+app.get("/sum", (req, res) => {
+  const { a, b } = req.query;
+  const result = Number(a) + Number(b);
+  res.json({ result });
 });
 
-app.listen(3000);
+app.get("/subtract", (req, res) => {
+  const { a, b } = req.query;
+  const result = Number(a) - Number(b);
+  res.json({ result });
+});
+
+app.listen(port, () => {
+  console.log(`Server is running on port http://localhost:${port}`);
+});

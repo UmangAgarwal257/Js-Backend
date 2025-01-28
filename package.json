@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon 3rd_one/index.js",
+    "dev": "nodemon 4th_one/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

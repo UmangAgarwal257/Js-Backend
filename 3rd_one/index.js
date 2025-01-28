@@ -2,28 +2,22 @@ const express = require("express");
 
 const app = express();
 
-function isOldEnoughMiddleWare(req, res, next) {
-  const age = req.query.age;
-  if (age >= 14) {
-    next();
-  } else {
-    res.status(411).json({
-      msg: "Sorry you are not of age yet",
-    });
-  }
-}
+let requestCount = 0;
 
-app.use(isOldEnoughMiddleWare);
+app.use((req, res, next) => {
+  requestCount++;
+  next();
+});
 
-app.get("/ride2", (req, res) => {
-  res.json({
-    msg: "You have successfully riden ride 2",
+app.get("/user", (req, res) => {
+  res.status(200).json({
+    msg: "John Doe",
   });
 });
 
-app.get("/ride1", (req, res) => {
-  res.json({
-    msg: "You have successfully riden ride 1",
+app.get("/requestCount", (req, res) => {
+  res.status(200).json({
+    requestCount,
   });
 });
 

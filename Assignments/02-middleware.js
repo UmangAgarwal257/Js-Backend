@@ -5,10 +5,12 @@ const port = 3000;
 
 let requestCount = 0;
 
-app.use((req, res, next) => {
+const requestLogger = (req, res, next) => {
   requestCount++;
   next();
-});
+};
+
+app.use(requestLogger);
 
 app.get("/requestCount", (req, res) => {
   res.json({

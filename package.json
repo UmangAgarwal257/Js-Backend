@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon 5th_one/cors.js",
+    "dev": "nodemon 6th_auth/auth.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

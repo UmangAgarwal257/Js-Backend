@@ -1,8 +1,8 @@
 const express = require("express");
-
+const jwt = require("jsonwebtoken");
 const app = express();
 const port = 3000;
-const JWT_SECRET = "USER_APP";
+const JWT_SECRET = "Umang123";
 
 app.use(express.json());
 
@@ -34,8 +34,8 @@ app.post("/signup", (req, res) => {
   const password = req.body.password;
 
   users.push({
-    username: username,
-    password: password,
+    username,
+    password,
   });
 
   res.json({
@@ -58,14 +58,14 @@ app.post("/signin", (req, res) => {
       },
       JWT_SECRET
     );
-
+    res.header("authorization", token);
     user.token = token;
-    res.send({
+    res.json({
       token,
     });
     console.log(users);
   } else {
-    res.status(403).send({
+    res.status(403).json({
       message: "Invalid username or password",
     });
   }
@@ -79,9 +79,10 @@ app.get("/me", (req, res) => {
   const username = userDetails.username;
   const user = users.find((user) => user.token === token);
 
-  if (user) {
+  if (userDetails) {
     res.json({
       username: user.username,
+      password: user.password,
     });
   } else {
     res.status(401).json({

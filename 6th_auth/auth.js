@@ -7,7 +7,7 @@ const JWT_SECRET = "Umang123";
 app.use(express.json());
 
 function auth(req, res, next) {
-  const token = req.headers.authorization;
+  const token = req.headers.token;
 
   if (token) {
     jwt.verify(token, JWT_SECRET, (err, decoded) => {
@@ -28,6 +28,10 @@ function auth(req, res, next) {
 }
 
 const users = [];
+
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/index.html");
+});
 
 app.post("/signup", (req, res) => {
   const username = req.body.username;
@@ -58,7 +62,7 @@ app.post("/signin", (req, res) => {
       },
       JWT_SECRET
     );
-    res.header("authorization", token);
+    res.header("token", token);
     user.token = token;
     res.json({
       token,
@@ -74,7 +78,7 @@ app.post("/signin", (req, res) => {
 app.use(auth);
 
 app.get("/me", (req, res) => {
-  const token = req.headers.authorization;
+  const token = req.headers.token;
   const userDetails = jwt.verify(token, JWT_SECRET);
   const username = userDetails.username;
   const user = users.find((user) => user.token === token);

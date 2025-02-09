@@ -1,8 +1,10 @@
 const express = require("express");
 const { UserModel, TodoModel } = require("./db");
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { auth, JWT_SECRET } = require("./auth");
 const mongoose = require("mongoose");
+const { z } = require("zod");
 const app = express();
 const port = 3000;
 
@@ -12,19 +14,45 @@ mongoose.connect(
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
-  const name = req.body.name;
-  const password = req.body.password;
-  const email = req.body.email;
-
-  await UserModel.create({
-    name: name,
-    password: password,
-    email: email,
+  const requiredBody = z.object({
+    email: z.string().min(3).max(30).email(),
+    name: z.string().min(3).max(30),
+    password: z
+      .string()
+      .min(3)
+      .max(30)
+      .regex(/^(?=.*[A-Z])(?=.*[a-z])(?=.*[^A-Za-z0-9]).*$/),
   });
 
-  res.json({
-    message: "You are signed up",
-  });
+  const parsedDataWithSuccess = requiredBody.safeParse(req.body);
+
+  if (!parsedDataWithSuccess.success) {
+    res.json({
+      message: "Incorrect format",
+    });
+    return;
+  }
+  try {
+    const name = req.body.name;
+    const password = req.body.password;
+    const email = req.body.email;
+
+    const hashedPassword = await bcrypt.hash(password, 5);
+
+    await UserModel.create({
+      name: name,
+      password: hashedPassword,
+      email: email,
+    });
+
+    res.json({
+      message: "You are signed up",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error during signup",
+    });
+  }
 });
 
 app.post("/signin", async (req, res) => {
@@ -33,10 +61,18 @@ app.post("/signin", async (req, res) => {
 
   const response = await UserModel.findOne({
     email: email,
-    password: password,
   });
 
-  if (response) {
+  if (!response) {
+    res.status(401).json({
+      message: "This user doesn't exist",
+    });
+    return;
+  }
+
+  const passwordMatch = await bcrypt.compare(password, response.password);
+
+  if (passwordMatch) {
     const token = jwt.sign(
       {
         id: response._id.toString(),

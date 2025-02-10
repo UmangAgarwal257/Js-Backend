@@ -1,4 +1,5 @@
-const { Schema } = require("mongoose");
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 const ObjectId = mongoose.ObjectId;
 
 const userSchema = new Schema({
@@ -35,11 +36,11 @@ const purchaseSchema = new Schema({
 const UserModel = mongoose.model("users", userSchema);
 const AdminModel = mongoose.model("admin", adminSchema);
 const CourseModel = mongoose.model("course", courseSchema);
-const PurchasesModel = mongoose.model("purchase", purchaseSchema);
+const PurchaseModel = mongoose.model("purchase", purchaseSchema);
 
 module.exports = {
-  UserModel: UserModel,
-  AdminModel: AdminModel,
-  CourseModel: CourseModel,
-  PurchasesModel: PurchasesModel,
+  UserModel,
+  AdminModel,
+  CourseModel,
+  PurchaseModel,
 };

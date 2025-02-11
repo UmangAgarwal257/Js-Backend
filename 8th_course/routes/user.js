@@ -5,6 +5,7 @@ const { z } = require("zod");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const userRouter = Router();
+const { userMiddleware } = require("../middlewares/user_auth");
 
 userRouter.post("/signup", async (req, res) => {
   const requiredBody = z.object({
@@ -75,7 +76,7 @@ userRouter.post("/signin", async (req, res) => {
   }
 });
 
-userRouter.get("/purchases", (req, res) => {
+userRouter.get("/purchases", userMiddleware, (req, res) => {
   res.json({
     message: "purchases endpoint",
   });

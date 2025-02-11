@@ -5,8 +5,7 @@ const { z } = require("zod");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const adminRouter = Router();
-
-// adminRouter.use(adminMiddleware);
+const { adminMiddleware } = require("../middlewares/admin_auth");
 
 adminRouter.post("/signup", async (req, res) => {
   const requiredBody = z.object({
@@ -77,7 +76,7 @@ adminRouter.post("/signin", async (req, res) => {
   }
 });
 
-adminRouter.post("/course", (req, res) => {
+adminRouter.post("/course", adminMiddleware, (req, res) => {
   res.json({
     message: "course endpoint",
   });

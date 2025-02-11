@@ -1,5 +1,5 @@
 const { Router } = require("express");
-const { AdminModel } = require("../db");
+const { AdminModel, CourseModel } = require("../db");
 require("dotenv").config({ path: __dirname + "/../.env" });
 const { z } = require("zod");
 const jwt = require("jsonwebtoken");
@@ -76,21 +76,52 @@ adminRouter.post("/signin", async (req, res) => {
   }
 });
 
-adminRouter.post("/course", adminMiddleware, (req, res) => {
+adminRouter.post("/course", adminMiddleware, async (req, res) => {
+  const adminId = req.userId;
+  const { title, description, imageUrl, price } = req.body;
+
+  const course = await CourseModel.create({
+    title,
+    description,
+    imageUrl,
+    price,
+    creatorId: adminId,
+  });
+
   res.json({
-    message: "course endpoint",
+    message: "Course Created",
+    courseId: course._id,
   });
 });
 
-adminRouter.put("/course", (req, res) => {
+adminRouter.put("/course", adminMiddleware, async (req, res) => {
+  const adminId = req.userId;
+  const { title, description, imageUrl, price, courseId } = req.body;
+  const course = await CourseModel.updateOne(
+    {
+      _id: courseId,
+      creatorId: adminId,
+    },
+    {
+      title,
+      description,
+      imageUrl,
+      price,
+    }
+  );
   res.json({
-    message: "course endpoint",
+    message: "Course Updated",
+    courseId: course._id,
   });
 });
 
-adminRouter.get("/course/all", (req, res) => {
+adminRouter.get("/course/all", adminMiddleware, async (req, res) => {
+  const adminId = req.userId;
+  const courses = await CourseModel.find({
+    creatorId: adminId,
+  });
   res.json({
-    message: "course endpoint",
+    courses,
   });
 });
 

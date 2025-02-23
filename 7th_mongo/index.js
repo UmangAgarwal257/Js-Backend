@@ -2,15 +2,14 @@ const express = require("express");
 const { UserModel, TodoModel } = require("./db");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { auth, JWT_SECRET } = require("./auth");
+require("dotenv").config();
+const { auth } = require("./auth");
 const mongoose = require("mongoose");
 const { z } = require("zod");
 const app = express();
 const port = 3000;
 
-mongoose.connect(
-  "mongodb+srv://umangagarwal257:tannu2006@cluster0.2lbtw.mongodb.net/todo-umang"
-);
+mongoose.connect(process.env.MONGODB_URI);
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
@@ -77,7 +76,7 @@ app.post("/signin", async (req, res) => {
       {
         id: response._id.toString(),
       },
-      JWT_SECRET
+      process.env.JWT_SECRET
     );
 
     res.json({

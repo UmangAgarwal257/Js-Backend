@@ -4,18 +4,30 @@ import './App.css'
 function App() {
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [messages, setMessages] = useState<string[]>([]);
+  const [room, setRoom] = useState<string>('');
+  const [isJoined, setIsJoined] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  function joinRoom() {
+    if (!socket || !room) return;
+    socket.send(JSON.stringify({
+      type: 'join',
+      payload: { roomId: room }
+    }));
+    setIsJoined(true);
+  }
+
   function sendMessage() {
-    if(!socket) return;
-    if(!inputRef.current) return;
+    if (!socket || !inputRef.current?.value || !isJoined) return;
     const message = inputRef.current.value;
-    socket.send(message);
+    socket.send(JSON.stringify({
+      type: 'chat',
+      payload: { message }
+    }));
     inputRef.current.value = '';
   }
 
   useEffect(() => {
-
     const ws = new WebSocket("ws://localhost:8080")
     setSocket(ws)
 
@@ -23,36 +35,42 @@ function App() {
       setMessages(prev => [...prev, e.data]);
     }
 
-    ws.onopen = () => {
-      console.log('Connected to WebSocket');
-    }
-
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    }
-
     ws.onclose = () => {
-      console.log('Disconnected from WebSocket');
+      setIsJoined(false);
+      setSocket(null);
     }
 
-    return () => {
-      ws.close();
-    }
+    return () => ws.close();
   }, [])
   
   return (
     <div className="chat-container">
-      <div className="messages">
-        {messages.map((msg, index) => (
-          <div key={index} className="message">
-            {msg}
+      {!isJoined ? (
+        <div className="join-container">
+          <input 
+            type="text" 
+            placeholder="Enter room ID" 
+            value={room}
+            onChange={(e) => setRoom(e.target.value)}
+          />
+          <button onClick={joinRoom}>Join Room</button>
+        </div>
+      ) : (
+        <>
+          <div className="room-info">Room: {room}</div>
+          <div className="messages">
+            {messages.map((msg, index) => (
+              <div key={index} className="message">
+                {msg}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      <div className="input-area">
-        <input ref={inputRef} type="text" placeholder='Message ...' />
-        <button onClick={sendMessage}>Send</button>
-      </div>
+          <div className="input-area">
+            <input ref={inputRef} type="text" placeholder='Message ...' />
+            <button onClick={sendMessage}>Send</button>
+          </div>
+        </>
+      )}
     </div>
   )
 }

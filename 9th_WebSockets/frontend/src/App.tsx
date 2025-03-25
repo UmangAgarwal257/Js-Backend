@@ -28,20 +28,25 @@ function App() {
   }
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:8080")
-    setSocket(ws)
+    const ws = new WebSocket("ws://localhost:8080");
+    setSocket(ws);
 
     ws.onmessage = (e) => {
-      setMessages(prev => [...prev, e.data]);
-    }
+      const parsedData = JSON.parse(e.data);
+      if (parsedData.type === 'notification') {
+        setMessages(prev => [...prev, parsedData.payload.message]);
+      } else if (parsedData.type === 'chat') {
+        setMessages(prev => [...prev, parsedData.payload.message]);
+      }
+    };
 
     ws.onclose = () => {
       setIsJoined(false);
       setSocket(null);
-    }
+    };
 
     return () => ws.close();
-  }, [])
+  }, []);
   
   return (
     <div className="chat-container">
